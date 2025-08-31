@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4a90e2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ocean Wave Animation */
+        .ocean {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .wave {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+            animation: wave 15s ease-in-out infinite;
+        }
+
+        .wave:nth-child(2) {
+            animation-delay: -5s;
+            opacity: 0.6;
+        }
+
+        .wave:nth-child(3) {
+            animation-delay: -10s;
+            opacity: 0.4;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(-100%) skewX(-12deg); }
+            50% { transform: translateX(0%) skewX(-6deg); }
+            100% { transform: translateX(100%) skewX(-12deg); }
+        }
+
+        /* Floating bubbles */
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: bubble-float 6s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) { width: 20px; height: 20px; left: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 15px; height: 15px; left: 20%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 25px; height: 25px; left: 80%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 10px; height: 10px; left: 90%; animation-delay: 1s; }
+
+        @keyframes bubble-float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ffffff, #e3f2fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .prediction-form {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: white;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .form-group select option {
+            background: #2a5298;
+            color: white;
+        }
+
+        .predict-btn {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255,107,107,0.4);
+        }
+
+        .predict-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .result p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .survived {
+            color: #4CAF50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .not-survived {
+            color: #f44336;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .ship-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .prediction-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ocean">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🚢 Titanic Survival Predictor</h1>
+            <p>Learn from history to build a safer future on the seas</p>
+        </div>
+
+        <div class="prediction-form">
+            <form method="POST" action="/predict">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pclass">🎫 Passenger Class</label>
+                        <select name="pclass" id="pclass" required>
+                            <option value="">Select Class</option>
+                            <option value="1">First Class (1)</option>
+                            <option value="2">Second Class (2)</option>
+                            <option value="3">Third Class (3)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">👤 Gender</label>
+                        <select name="sex" id="sex" required>
+                            <option value="">Select Gender</option>
+                            <option value="0">Female (0)</option>
+                            <option value="1">Male (1)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">🎂 Age</label>
+                    <input type="number" name="age" id="age" placeholder="Enter age (e.g., 25)" min="0" max="100" step="0.1" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sibsp">👨‍👩‍👧‍👦 Siblings/Spouses Aboard</label>
+                        <select name="sibsp" id="sibsp" required>
+                            <option value="">Select Number</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parch">👶 Parents/Children Aboard</label>
+                        <select name="parch" id="parch" required>
+                            <option value="">Select Number</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="predict-btn">
+                    ⚓ Predict Survival Chance
+                </button>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="result">
+            <div class="ship-icon">⚓</div>
+            <h3 class="{% if result == 'Survived' %}survived{% else %}not-survived{% endif %}">
+                Prediction: {{ result }}
+            </h3>
+            {% if result == 'Survived' %}
+                <p>✅ Based on the historical Titanic data, this passenger profile suggests a higher likelihood of survival. This information helps us understand safety factors for future maritime travel.</p>
+            {% else %}
+                <p>⚠️ Based on the historical Titanic data, this passenger profile suggests challenges for survival. This analysis helps improve safety measures and emergency protocols for future maritime travel.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.prediction-form');
+            const inputs = form.querySelectorAll('input, select');
+            
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add floating animation to result
+            const result = document.querySelector('.result');
+            if (result) {
+                result.style.animation = 'fadeIn 0.8s ease-out, float 4s ease-in-out infinite 1s';
+            }
+        });
+    </script>
+</body>
+</html>
