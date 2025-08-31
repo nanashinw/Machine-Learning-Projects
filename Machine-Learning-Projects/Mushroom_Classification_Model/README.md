@@ -2,7 +2,7 @@
 
 🔹 Core Libraries
 pip install numpy
-pip install pandas
+pip install pandas<br>
 
 🔹 Visualization
 pip install matplotlib
