@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Drug Classification ML API</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+  
+  <style>
+    body {
+      background: linear-gradient(45deg, #49a09d, #5f2c82);
+      font-family: 'Arimo', sans-serif;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .login {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      margin: 50px auto;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    
+    h1 {
+      font-family: 'Pacifico', cursive;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    input[type="number"]::placeholder, input[type="text"]::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    
+    input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+    
+    .section-title {
+      font-size: 1.2em;
+      margin-top: 25px;
+      margin-bottom: 15px;
+      color: #fff;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 5px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 20px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .prediction-result {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login">
+    <h1>Drug Classification Prediction</h1>
+
+    <!-- Main Input Form for ML Model -->
+    <form action="{{ url_for('predict') }}" method="post">
+      
+      <!-- Basic Patient Information -->
+      <div class="form-group">
+        <label for="Age">Age:</label>
+        <input type="number" name="Age" id="Age" placeholder="Enter patient age" required min="1" max="120">
+      </div>
+
+      <div class="form-group">
+        <label for="Na_to_K">Sodium to Potassium Ratio (Na_to_K):</label>
+        <input type="number" name="Na_to_K" id="Na_to_K" placeholder="Enter Na to K ratio" step="0.001" required>
+      </div>
+
+      <!-- Gender Selection -->
+      <div class="section-title">Gender</div>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" name="Sex_F" id="Sex_F" value="true">
+          <label for="Sex_F">Female</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" name="Sex_M" id="Sex_M" value="true">
+          <label for="Sex_M">Male</label>
+        </div>
+      </div>
+
+      <!-- Blood Pressure -->
+      <div class="section-title">Blood Pressure</div>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" name="BP_HIGH" id="BP_HIGH" value="true">
+          <label for="BP_HIGH">High BP</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" name="BP_LOW" id="BP_LOW" value="true">
+          <label for="BP_LOW">Low BP</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" name="BP_NORMAL" id="BP_NORMAL" value="true">
+          <label for="BP_NORMAL">Normal BP</label>
+        </div>
+      </div>
+
+      <!-- Cholesterol -->
+      <div class="section-title">Cholesterol Level</div>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" name="Cholesterol_HIGH" id="Cholesterol_HIGH" value="true">
+          <label for="Cholesterol_HIGH">High Cholesterol</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" name="Cholesterol_NORMAL" id="Cholesterol_NORMAL" value="true">
+          <label for="Cholesterol_NORMAL">Normal Cholesterol</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-large">Predict Drug</button>
+    </form>
+
+    <br>
+    {% if prediction_text %}
+    <div class="prediction-result">
+      {{ prediction_text }}
+    </div>
+    {% endif %}
+
+  </div>
+
+  <script>
+    // Ensure only one gender is selected
+    document.getElementById('Sex_F').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('Sex_M').checked = false;
+      }
+    });
+    
+    document.getElementById('Sex_M').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('Sex_F').checked = false;
+      }
+    });
+
+    // Ensure only one blood pressure level is selected
+    const bpCheckboxes = ['BP_HIGH', 'BP_LOW', 'BP_NORMAL'];
+    bpCheckboxes.forEach(id => {
+      document.getElementById(id).addEventListener('change', function() {
+        if (this.checked) {
+          bpCheckboxes.forEach(otherId => {
+            if (otherId !== id) {
+              document.getElementById(otherId).checked = false;
+            }
+          });
+        }
+      });
+    });
+
+    // Ensure only one cholesterol level is selected
+    const cholCheckboxes = ['Cholesterol_HIGH', 'Cholesterol_NORMAL'];
+    cholCheckboxes.forEach(id => {
+      document.getElementById(id).addEventListener('change', function() {
+        if (this.checked) {
+          cholCheckboxes.forEach(otherId => {
+            if (otherId !== id) {
+              document.getElementById(otherId).checked = false;
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
